@@ -86,7 +86,7 @@ def show(page):
     return pages[page]()
 
 
-starting_page = pn.state.session_args.get("page", [b"Page 1"])[0].decode()
+starting_page = pn.state.session_args.get("page", [b"Overview"])[0].decode()
 page = pn.widgets.RadioButtonGroup(
     value=starting_page,
     options=list(pages.keys()),
