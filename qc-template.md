@@ -23,8 +23,8 @@ import tskit
 
 importlib.reload(utils)
 
-# ts = tskit.load("data/hgdp_tgp_sgdp_high_cov_ancients_chr20_q.dated.trees")
-ts = tszip.decompress("data/hgdp_tgp_sgdp_chr2_q.dated.trees.tsz")
+ts = tskit.load("data/hgdp_tgp_sgdp_high_cov_ancients_chr20_q.dated.trees")
+#ts = tszip.decompress("data/hgdp_tgp_sgdp_chr2_q.dated.trees.tsz")
 tinfo = utils.TreeInfo(ts, 6)
 tinfo
 ```
@@ -51,4 +51,67 @@ tinfo.plot_tree_spans(log_transform=True, region_end=200_000_000, region_start=1
 
 ```python
 tinfo.plot_mean_node_arity(show_counts=True)
+```
+
+```python
+import holoviews as hv
+import pandas as pd
+hv.extension('bokeh')
+```
+
+```python
+def mutations_data(ts):
+    data = {
+        "position": ts.sites_position[ts.mutations_site].astype(int),
+        "node": ts.mutations_node,
+        "time": ts.nodes_time[ts.mutations_node], #ts.mutations_time,
+    }
+    return pd.DataFrame(data)
+
+df = mutations_data(ts)
+df
+```
+
+```python
+df.groupby("position").
+```
+
+```python
+ds = hv.Dataset(df)
+ds
+```
+
+```python
+ds.data
+```
+
+```python
+ds.aggregate("position", function="count").data
+```
+
+```python
+ds.hist(dimension="node", adjoin=False)
+```
+
+```python
+df.groupby("position").count()
+```
+
+```python
+hv.Histogram(tinfo.sites_num_mutations)
+```
+
+```python
+tinfo.sites_num_mutations
+```
+
+```python
+import numpy as np
+count, bins = np.histogram(tinfo.sites_num_mutations, bins=range(29))
+hv.Histogram((count, bins))
+```
+
+```python
+import matplotlib.pyplot as plt
+plt.hist(tinfo.sites_num_mutations, bins=range(29))
 ```

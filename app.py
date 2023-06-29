@@ -54,27 +54,33 @@ def page2():
     time_hist = hv.operation.element.histogram(ds_mutations, dimension="time")
     site_hist = hv.operation.element.histogram(ds_mutations, dimension="position")
 
-    stream = hv.streams.Tap(source=points, x=np.nan, y=np.nan)
+    # stream = hv.streams.Tap(source=points, x=np.nan, y=np.nan)
 
-    @pn.depends(stream.param.x, stream.param.y)
-    def location(x, y):
-        print("TAP", x, y)
-        # This is a bad way to do it!
-        # jitter = 10
-        # pos = df_mutations.position.between(x - jitter, x + jitter)
-        # time = df_mutations.time.between(y - jitter, y + jitter)
-        # subset = df_mutations[pos & time]
-        # print(subset)
-        return pn.pane.Str(f"Click at {x:.2f}, {y:.2f}", width=200)
+    # @pn.depends(stream.param.x, stream.param.y)
+    # def location(x, y):
+    #     print("TAP", x, y)
+    #     # This is a bad way to do it!
+    #     # jitter = 10
+    #     # pos = df_mutations.position.between(x - jitter, x + jitter)
+    #     # time = df_mutations.time.between(y - jitter, y + jitter)
+    #     # subset = df_mutations[pos & time]
+    #     # print(subset)
+    #     return pn.pane.Str(f"Click at {x:.2f}, {y:.2f}", width=200)
 
-    return pn.Column(main << time_hist << site_hist, location)
+    count, bins = np.histogram(ti.sites_num_mutations, bins=range(29))
+    overall_site_hist = hv.Histogram((count, bins)).opts(
+        title="Mutations per site", tools=["hover"]
+    )
 
+    # Gah - these two axes are linked
+    count, bins = np.histogram(ti.nodes_num_mutations, bins=range(10))
+    overall_node_hist = hv.Histogram((count, bins)).opts(
+        title="Mutations per node", tools=["hover"]
+    )
 
-def mutations_data(left, right):
-    # Take a subset of the data based on 'left' and 'right'
-    position = df_mutations["position"]
-    subset = df_mutations[(position >= left) & (position < right)]
-    return subset
+    return pn.Column(
+        main << time_hist << site_hist, overall_site_hist, overall_node_hist
+    )
 
 
 pn.extension(sizing_mode="stretch_width")
